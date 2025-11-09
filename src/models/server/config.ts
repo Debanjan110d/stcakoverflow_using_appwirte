@@ -1,14 +1,9 @@
-import env from "@/app/env";
-import {Avatars, Client, Databases, Storage,Users} from "node-appwrite";
+import { Avatars, Client, Databases, Storage, Users } from "node-appwrite";
 
-// eslint-disable-next-line prefer-const
-let client = new Client();
-
-client
-    .setEndpoint(env.appwriteEndpoint) // Your API Endpoint
-    .setProject(env.appwriteProjectId) // Your project ID
-    .setKey(env.apiKey) // Your secret API key
-;
+const client = new Client()
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_HOST_URI!)
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
+    .setKey(process.env.APPWRITE_API_KEY!);
 
 export const users = new Users(client);
 export const avatars = new Avatars(client);

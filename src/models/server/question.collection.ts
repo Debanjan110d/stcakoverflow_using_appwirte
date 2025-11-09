@@ -1,174 +1,157 @@
-// src/models/server/question.collection.ts
-import dotenv from "../env";
-dotenv.config(); // ensures process.env is loaded when running as a script
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Client, TablesDB, Permission, Role, IndexType } from "node-appwrite";
+import { db, questionCollection } from "@/models/name";
 
-import { Client, Databases, Permission, Role, IndexType } from "node-appwrite";
-import { db, questionCollection } from "@/lib/name"; // adjust path if necessary
-
-const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_HOST_URI;
-const PROJECT_ID = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
-const SERVER_KEY = process.env.APPWRITE_API_KEY; // must be set in .env (server-only)
-const DATABASE_ID = process.env.APPWRITE_DATABASE_ID || db; // fallback to db constant
-
-if (!ENDPOINT || !PROJECT_ID) {
-  console.error("Missing NEXT_PUBLIC_APPWRITE_HOST_URI or NEXT_PUBLIC_APPWRITE_PROJECT_ID");
-  process.exit(1);
-}
-if (!SERVER_KEY) {
-  console.error("Missing APPWRITE_API_KEY (server-only). Set APPWRITE_API_KEY in .env");
-  process.exit(1);
-}
+const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_HOST_URI!;
+const PROJECT_ID = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!;
+const SERVER_KEY = process.env.APPWRITE_API_KEY!;
+const DATABASE_ID = process.env.APPWRITE_DATABASE_ID || db;
 
 const client = new Client()
   .setEndpoint(ENDPOINT)
   .setProject(PROJECT_ID)
   .setKey(SERVER_KEY);
 
-const databases = new Databases(client);
+// 🆕 use Tables instead of Databases
+const tables = new TablesDB(client);
 
-function isAlreadyExistsError(err: any) {
-  // Appwrite typically returns code 409 for "already exists" (collection/attribute/index)
-  return err && (err.code === 409 || String(err).toLowerCase().includes("already"));
+function isAlreadyExistsError(err: unknown): boolean {
+  return (
+    (typeof err === "object" && err !== null && "code" in err && (err as any).code === 409) ||
+    String(err).toLowerCase().includes("already")
+  );
 }
 
-async function safeCall(fn: () => Promise<any>, description = "") {
+async function safeCall(fn: () => Promise<unknown>, description = ""): Promise<unknown> {
   try {
     return await fn();
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (isAlreadyExistsError(err)) {
       console.warn(`${description} already exists — skipping.`);
       return null;
     }
-    console.error(`Error during ${description}:`, err?.message ?? err);
+    console.error(`Error during ${description}:`, err);
     throw err;
   }
 }
 
-export async function createQuestionCollection() {
-  console.log("Starting creation of collection:", questionCollection);
+export async function createQuestionTable() {
+  console.log("Starting creation of table:", questionCollection);
 
-  // 1) Create collection
+  // 🆕 createTable instead of createCollection
   await safeCall(
     () =>
-      databases.createCollection({
+      tables.createTable({
         databaseId: DATABASE_ID,
-        collectionId: questionCollection,
+        tableId: questionCollection,
         name: questionCollection,
         permissions: [
-          Permission.read(Role.any()), // public read
-          Permission.create(Role.users()), // logged-in users can create
+          Permission.read(Role.any()),
+          Permission.create(Role.users()),
           Permission.update(Role.users()),
           Permission.delete(Role.users()),
         ],
-        documentSecurity: false,
+        enabled: true,
       }),
-    "createCollection"
+    "createTable"
   );
 
-  // 2) Create attributes
+  // 🆕 createStringColumn instead of createStringAttribute
   await Promise.all([
     safeCall(
       () =>
-        databases.createStringAttribute({
+        tables.createStringColumn({
           databaseId: DATABASE_ID,
-          collectionId: questionCollection,
+          tableId: questionCollection,
           key: "title",
           size: 200,
           required: true,
         }),
-      "createStringAttribute:title"
+      "createStringColumn:title"
     ),
     safeCall(
       () =>
-        databases.createStringAttribute({
+        tables.createStringColumn({
           databaseId: DATABASE_ID,
-          collectionId: questionCollection,
+          tableId: questionCollection,
           key: "content",
           size: 5000,
           required: true,
         }),
-      "createStringAttribute:content"
+      "createStringColumn:content"
     ),
     safeCall(
       () =>
-        databases.createStringAttribute({
+        tables.createStringColumn({
           databaseId: DATABASE_ID,
-          collectionId: questionCollection,
+          tableId: questionCollection,
           key: "authorId",
           size: 64,
           required: true,
         }),
-      "createStringAttribute:authorId"
+      "createStringColumn:authorId"
     ),
     safeCall(
       () =>
-        databases.createStringAttribute({
+        tables.createStringColumn({
           databaseId: DATABASE_ID,
-          collectionId: questionCollection,
+          tableId: questionCollection,
           key: "tags",
           size: 100,
           required: false,
           array: true,
         }),
-      "createStringAttribute:tags"
+      "createStringColumn:tags"
     ),
     safeCall(
       () =>
-        databases.createStringAttribute({
+        tables.createStringColumn({
           databaseId: DATABASE_ID,
-          collectionId: questionCollection,
+          tableId: questionCollection,
           key: "attachmentId",
           size: 64,
           required: false,
         }),
-      "createStringAttribute:attachmentId"
+      "createStringColumn:attachmentId"
     ),
   ]);
 
-  // 3) Create indexes
+  // 🆕 createIndex (structure is same but still under TablesDB)
   await Promise.all([
     safeCall(
       () =>
-        databases.createIndex({
+        tables.createIndex({
           databaseId: DATABASE_ID,
-          collectionId: questionCollection,
+          tableId: questionCollection,
           key: "idx_title_fulltext",
-          type: IndexType.FullText,
-          attributes: ["title"],
+          type: IndexType.Fulltext,
+          columns: ["title"],
         }),
       "createIndex:idx_title_fulltext"
     ),
     safeCall(
       () =>
-        databases.createIndex({
+        tables.createIndex({
           databaseId: DATABASE_ID,
-          collectionId: questionCollection,
+          tableId: questionCollection,
           key: "idx_authorid_key",
           type: IndexType.Key,
-          attributes: ["authorId"],
+          columns: ["authorId"],
         }),
       "createIndex:idx_authorid_key"
     ),
     safeCall(
       () =>
-        databases.createIndex({
+        tables.createIndex({
           databaseId: DATABASE_ID,
-          collectionId: questionCollection,
+          tableId: questionCollection,
           key: "idx_tags_key",
           type: IndexType.Key,
-          attributes: ["tags"],
+          columns: ["tags"],
         }),
       "createIndex:idx_tags_key"
     ),
   ]);
 
-  console.log("Question collection setup complete. Check Appwrite console.");
-}
-
-// If executed directly from node/ts-node, run:
-if (require.main === module) {
-  createQuestionCollection().catch((err) => {
-    console.error("Fatal error:", err);
-    process.exit(1);
-  });
+  console.log("✅ Table setup complete. Check Appwrite Console.");
 }

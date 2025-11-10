@@ -12,7 +12,6 @@ const client = new Client()
   .setProject(PROJECT_ID)
   .setKey(SERVER_KEY);
 
-// 🆕 use Tables instead of Databases
 const tables = new TablesDB(client);
 
 function isAlreadyExistsError(err: unknown): boolean {
@@ -38,7 +37,6 @@ async function safeCall(fn: () => Promise<unknown>, description = ""): Promise<u
 export async function createQuestionTable() {
   console.log("Starting creation of table:", questionCollection);
 
-  // 🆕 createTable instead of createCollection
   await safeCall(
     () =>
       tables.createTable({
@@ -56,7 +54,6 @@ export async function createQuestionTable() {
     "createTable"
   );
 
-  // 🆕 createStringColumn instead of createStringAttribute
   await Promise.all([
     safeCall(
       () =>
@@ -116,7 +113,6 @@ export async function createQuestionTable() {
     ),
   ]);
 
-  // 🆕 createIndex (structure is same but still under TablesDB)
   await Promise.all([
     safeCall(
       () =>
@@ -153,5 +149,6 @@ export async function createQuestionTable() {
     ),
   ]);
 
-  console.log("✅ Table setup complete. Check Appwrite Console.");
+  console.log("✅ Question table setup complete.");
 }
+

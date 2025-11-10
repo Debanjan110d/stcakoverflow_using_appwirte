@@ -1,5 +1,5 @@
 import { Client, TablesDB, Permission, Role, IndexType } from "node-appwrite";
-import { db, answerCollection } from "@/models/name";
+import { db, votesCollection } from "@/models/name";
 
 const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_HOST_URI!;
 const PROJECT_ID = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!;
@@ -13,13 +13,13 @@ const client = new Client()
 
 const tables = new TablesDB(client);
 
-export async function createAnswerTable() {
-    console.log("Starting creation of table:", answerCollection);
+export async function createVotesTable() {
+    console.log("Starting creation of table:", votesCollection);
 
     await tables.createTable({
         databaseId: DATABASE_ID,
-        tableId: answerCollection,
-        name: answerCollection,
+        tableId: votesCollection,
+        name: votesCollection,
         permissions: [
             Permission.read(Role.any()),
             Permission.create(Role.users()),
@@ -32,23 +32,30 @@ export async function createAnswerTable() {
     await Promise.all([
         tables.createStringColumn({
             databaseId: DATABASE_ID,
-            tableId: answerCollection,
-            key: "content",
-            size: 10000,
+            tableId: votesCollection,
+            key: "voteStatus",
+            size: 10,
             required: true,
         }),
         tables.createStringColumn({
             databaseId: DATABASE_ID,
-            tableId: answerCollection,
-            key: "authorId",
+            tableId: votesCollection,
+            key: "votedById",
             size: 64,
             required: true,
         }),
         tables.createStringColumn({
             databaseId: DATABASE_ID,
-            tableId: answerCollection,
-            key: "questionId",
+            tableId: votesCollection,
+            key: "typeId",
             size: 64,
+            required: true,
+        }),
+        tables.createStringColumn({
+            databaseId: DATABASE_ID,
+            tableId: votesCollection,
+            key: "type",
+            size: 20,
             required: true,
         }),
     ]);
@@ -56,19 +63,26 @@ export async function createAnswerTable() {
     await Promise.all([
         tables.createIndex({
             databaseId: DATABASE_ID,
-            tableId: answerCollection,
-            key: "idx_questionid_key",
+            tableId: votesCollection,
+            key: "idx_typeid_key",
             type: IndexType.Key,
-            columns: ["questionId"],
+            columns: ["typeId"],
         }),
         tables.createIndex({
             databaseId: DATABASE_ID,
-            tableId: answerCollection,
-            key: "idx_authorid_key",
+            tableId: votesCollection,
+            key: "idx_votedbyid_key",
             type: IndexType.Key,
-            columns: ["authorId"],
+            columns: ["votedById"],
+        }),
+        tables.createIndex({
+            databaseId: DATABASE_ID,
+            tableId: votesCollection,
+            key: "idx_type_key",
+            type: IndexType.Key,
+            columns: ["type"],
         }),
     ]);
 
-    console.log("✅ Answer table setup complete.");
+    console.log("✅ Votes table setup complete.");
 }

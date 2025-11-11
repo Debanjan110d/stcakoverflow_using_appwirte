@@ -12,6 +12,7 @@ const client = new Client()
   .setProject(PROJECT_ID)
   .setKey(SERVER_KEY);
 
+// 🆕 use Tables instead of Databases
 const tables = new TablesDB(client);
 
 function isAlreadyExistsError(err: unknown): boolean {
@@ -112,6 +113,9 @@ export async function createQuestionTable() {
       "createStringColumn:attachmentId"
     ),
   ]);
+
+  console.log("Waiting for columns to be available...");
+  await new Promise(resolve => setTimeout(resolve, 2000));
 
   await Promise.all([
     safeCall(

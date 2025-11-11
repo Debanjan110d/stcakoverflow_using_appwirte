@@ -13,75 +13,130 @@ const client = new Client()
 
 const tables = new TablesDB(client);
 
+function isAlreadyExistsError(err: unknown): boolean {
+    return (
+        (typeof err === "object" && err !== null && "code" in err && (err as { code: number }).code === 409) ||
+        String(err).toLowerCase().includes("already")
+    );
+}
+
+async function safeCall(fn: () => Promise<unknown>, description = ""): Promise<unknown> {
+    try {
+        return await fn();
+    } catch (err: unknown) {
+        if (isAlreadyExistsError(err)) {
+            console.warn(`${description} already exists — skipping.`);
+            return null;
+        }
+        console.error(`Error during ${description}:`, err);
+        throw err;
+    }
+}
+
 export async function createVotesTable() {
     console.log("Starting creation of table:", votesCollection);
 
-    await tables.createTable({
-        databaseId: DATABASE_ID,
-        tableId: votesCollection,
-        name: votesCollection,
-        permissions: [
-            Permission.read(Role.any()),
-            Permission.create(Role.users()),
-            Permission.update(Role.users()),
-            Permission.delete(Role.users()),
-        ],
-        enabled: true,
-    });
+    await safeCall(
+        () =>
+            tables.createTable({
+                databaseId: DATABASE_ID,
+                tableId: votesCollection,
+                name: votesCollection,
+                permissions: [
+                    Permission.read(Role.any()),
+                    Permission.create(Role.users()),
+                    Permission.update(Role.users()),
+                    Permission.delete(Role.users()),
+                ],
+                enabled: true,
+            }),
+        "createTable"
+    );
 
     await Promise.all([
-        tables.createStringColumn({
-            databaseId: DATABASE_ID,
-            tableId: votesCollection,
-            key: "voteStatus",
-            size: 10,
-            required: true,
-        }),
-        tables.createStringColumn({
-            databaseId: DATABASE_ID,
-            tableId: votesCollection,
-            key: "votedById",
-            size: 64,
-            required: true,
-        }),
-        tables.createStringColumn({
-            databaseId: DATABASE_ID,
-            tableId: votesCollection,
-            key: "typeId",
-            size: 64,
-            required: true,
-        }),
-        tables.createStringColumn({
-            databaseId: DATABASE_ID,
-            tableId: votesCollection,
-            key: "type",
-            size: 20,
-            required: true,
-        }),
+        safeCall(
+            () =>
+                tables.createStringColumn({
+                    databaseId: DATABASE_ID,
+                    tableId: votesCollection,
+                    key: "voteStatus",
+                    size: 10,
+                    required: true,
+                }),
+            "createStringColumn:voteStatus"
+        ),
+        safeCall(
+            () =>
+                tables.createStringColumn({
+                    databaseId: DATABASE_ID,
+                    tableId: votesCollection,
+                    key: "votedById",
+                    size: 64,
+                    required: true,
+                }),
+            "createStringColumn:votedById"
+        ),
+        safeCall(
+            () =>
+                tables.createStringColumn({
+                    databaseId: DATABASE_ID,
+                    tableId: votesCollection,
+                    key: "typeId",
+                    size: 64,
+                    required: true,
+                }),
+            "createStringColumn:typeId"
+        ),
+        safeCall(
+            () =>
+                tables.createStringColumn({
+                    databaseId: DATABASE_ID,
+                    tableId: votesCollection,
+                    key: "type",
+                    size: 20,
+                    required: true,
+                }),
+            "createStringColumn:type"
+        ),
     ]);
 
+    console.log("Waiting for columns to be available...");
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
     await Promise.all([
-        tables.createIndex({
-            databaseId: DATABASE_ID,
-            tableId: votesCollection,
-            key: "idx_typeid_key",
-            type: IndexType.Key,
-            columns: ["typeId"],
-        }),
-        tables.createIndex({
-            databaseId: DATABASE_ID,
-            tableId: votesCollection,
-            key: "idx_votedbyid_key",
-            type: IndexType.Key,
-            columns: ["votedById"],
-        }),
-        tables.createIndex({
-            databaseId: DATABASE_ID,
-            tableId: votesCollection,
-            key: "idx_type_key",
-            type: IndexType.Key,
-            columns: ["type"],
-        }),
+        safeCall(
+            () =>
+                tables.createIndex({
+                    databaseId: DATABASE_ID,
+                    tableId: votesCollection,
+                    key: "idx_typeid_key",
+                    type: IndexType.Key,
+                    columns: ["typeId"],
+                }),
+            "createIndex:idx_typeid_key"
+        ),
+        safeCall(
+            () =>
+                tables.createIndex({
+                    databaseId: DATABASE_ID,
+                    tableId: votesCollection,
+                    key: "idx_votedbyid_key",
+                    type: IndexType.Key,
+                    columns: ["votedById"],
+                }),
+            "createIndex:idx_votedbyid_key"
+        ),
+        safeCall(
+            () =>
+                tables.createIndex({
+                    databaseId: DATABASE_ID,
+                    tableId: votesCollection,
+                    key: "idx_type_key",
+                    type: IndexType.Key,
+                    columns: ["type"],
+                }),
+            "createIndex:idx_type_key"
+        ),
     ]);
 
     console.log("✅ Votes table setup complete.");

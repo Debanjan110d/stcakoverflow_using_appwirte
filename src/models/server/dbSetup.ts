@@ -3,7 +3,7 @@ import { createAnswerTable } from "./answer.collection";
 import { createQuestionTable } from "./question.collection";
 import { createVotesTable } from "./votes.collection";
 import { createCommentTable } from "./comment.collection";
-import { createQuestionAttachmentBucket } from "./storage.collection";
+
 import { databases } from "./config";
 
 export default async function createDB() {
@@ -15,7 +15,7 @@ export default async function createDB() {
     await createAnswerTable();
     await createVotesTable();
     await createCommentTable();
-    await createQuestionAttachmentBucket();
+
 
   } catch (error: unknown) {
     const status = error && typeof error === "object" && ("code" in error ? (error as { code: number }).code : 
@@ -38,7 +38,7 @@ export default async function createDB() {
         await createAnswerTable();
         await createVotesTable();
         await createCommentTable();
-        await createQuestionAttachmentBucket();
+
 
       } catch (createError: unknown) {
         const createMessage = createError instanceof Error ? createError.message : String(createError);

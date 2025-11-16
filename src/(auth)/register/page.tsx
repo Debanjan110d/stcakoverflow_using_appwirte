@@ -2,7 +2,7 @@ import { useAuthStore } from '@/store/Auth'
 import { LogIn } from 'lucide-react';
 import React, { FormEvent, useState } from 'react'
 
-function registerPage() {
+function RegisterPage() {
     const {createAccount,login} = useAuthStore();
     const [isLoading,setIsLoading] = useState(false);
     const [error,setError] = useState(" ");
@@ -47,8 +47,15 @@ function registerPage() {
     }
     
     return (
-        <div>registerPage</div>
+        <div>
+            {error && (
+                <p>{error}</p>)
+                }
+
+                <form onSubmit={handleSubmit}>
+                </form>
+        </div>
     )
 }
 
-export default registerPage
+export default RegisterPage

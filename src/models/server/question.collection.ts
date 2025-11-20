@@ -36,7 +36,7 @@ async function safeCall(fn: () => Promise<unknown>, description = ""): Promise<u
 }
 
 export async function createQuestionTable() {
-  console.log("Starting creation of table:", questionCollection);
+  // Starting creation of table: questionCollection
 
   await safeCall(
     () =>
@@ -114,8 +114,8 @@ export async function createQuestionTable() {
     ),
   ]);
 
-  console.log("Waiting for columns to be available...");
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  // Waiting for columns to be available...
+  await new Promise((resolve) => setTimeout(resolve, 2000));
 
   await Promise.all([
     safeCall(
@@ -153,6 +153,6 @@ export async function createQuestionTable() {
     ),
   ]);
 
-  console.log("✅ Question table setup complete.");
+  // Question table setup complete
 }
 

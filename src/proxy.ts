@@ -8,13 +8,17 @@ import createQuestionAttachmentBucket from './models/server/storageSetup'
 // This function can be marked `async` if using `await` inside
 export async function proxy(request: NextRequest) {// This fucntion run everywhere you want 
 
-
-    await Promise.all(
-        [
-            createDB(),
-            createQuestionAttachmentBucket()
-        ]
-    )
+    // DISABLED: Database setup should only run once, not on every page load
+    // This was causing massive console logs and slow page loads
+    // Run npm run setup-db manually if you need to setup the database
+    
+    // await Promise.all(
+    //     [
+    //         createDB(),
+    //         createQuestionAttachmentBucket()
+    //     ]
+    // )
+    
 return NextResponse.next()// It passes it to the next proxy or keep on doing its own stuff
 
 

@@ -34,9 +34,9 @@ async function safeCall(fn: () => Promise<unknown>, description = ""): Promise<u
 }
 
 export async function createCommentTable() {
-    console.log("Starting creation of table:", commentCollection);
+  // Starting creation of table: commentCollection
 
-    await safeCall(
+  await safeCall(
         () =>
             tables.createTable({
                 databaseId: DATABASE_ID,
@@ -128,5 +128,5 @@ export async function createCommentTable() {
         ),
     ]);
 
-    console.log("✅ Comment table setup complete.");
+    // Comment table setup complete
 }

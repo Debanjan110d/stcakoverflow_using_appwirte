@@ -31,7 +31,7 @@ async function retryWithBackoff<T>(fn: () => Promise<T>, retries = 3, delay = 10
 export default async function createDB() {
   try {
     await retryWithBackoff(() => databases.get({ databaseId: db }));
-    console.log("✅ Database already exists:", db);
+    // Database already exists, tables will be created if needed
 
     await createQuestionTable();
     await createAnswerTable();
@@ -54,7 +54,7 @@ export default async function createDB() {
           enabled: true,
         }));
 
-        console.log("✅ Database created:", created?.$id ?? created);
+        // Database created successfully
 
         await createQuestionTable();
         await createAnswerTable();

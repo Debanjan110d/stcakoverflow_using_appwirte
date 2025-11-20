@@ -1,21 +1,24 @@
 {
-  "name": "stackoverflow-appwrite",
-  "version": "0.1.0",
+  "name": "devqna",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "db:setup": "tsx src/models/server/dbSetup.ts"
+    "setup-db": "tsx scripts/setup-db.ts"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.8",
+    "@uiw/react-md-editor": "^4.0.8",
+    "animejs": "^4.2.2",
     "appwrite": "^21.4.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "immer": "^10.2.0",
     "lucide-react": "^0.553.0",
+    "motion": "^12.23.24",
     "next": "16.0.1",
     "node-appwrite": "^20.3.0",
     "react": "19.2.0",
@@ -26,6 +29,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/animejs": "^3.1.13",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

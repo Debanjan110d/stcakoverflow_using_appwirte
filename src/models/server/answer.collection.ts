@@ -34,9 +34,9 @@ async function safeCall(fn: () => Promise<unknown>, description = ""): Promise<u
 }
 
 export async function createAnswerTable() {
-    console.log("Starting creation of table:", answerCollection);
+  // Starting creation of table: answerCollection
 
-    await safeCall(
+  await safeCall(
         () =>
             tables.createTable({
                 databaseId: DATABASE_ID,
@@ -118,5 +118,5 @@ export async function createAnswerTable() {
         ),
     ]);
 
-    console.log("✅ Answer table setup complete.");
+    // Answer table setup complete
 }

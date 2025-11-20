@@ -12,9 +12,10 @@ import { account } from "@/models/client/config";
 //Lets make user reputaton 
 
 export interface UserPrefs {
-    reputation: number;// If you need more preference you can add them easily like light mode / dark mode etc 
+    reputation: number;
     name: string;
-    email: string
+    email: string;
+    avatar?: string;
 }
 
 interface MyAuthStore { //? This is a interface ,its coming up because we are using typescript if we are using hs we do't have to work with these things 
@@ -67,9 +68,8 @@ export const useAuthStore = create<MyAuthStore>()( //? the 1st () are initilizin
                         try {
                             const session = await account.getSession({sessionId: "current"});
                             set({ session }); //* set variable is just like useState  
-                        }
-                        catch (error) {
-                            console.log(error); 
+                        } catch {
+                            // Silent fail
                         }
                     },
 
@@ -85,14 +85,13 @@ export const useAuthStore = create<MyAuthStore>()( //? the 1st () are initilizin
                             }    
                             set({session,user,jwt});
                             return {
-                                sucess : true //This was missing
+                                sucess : true
                             }
                             
                         } catch (error) {
-                            console.log(error);
                             return {
                                 sucess : false,
-                                error : error instanceof AppwriteException ? error : null
+                                error : error as AppwriteException
                             }
                         }
                     }, 
@@ -106,10 +105,9 @@ export const useAuthStore = create<MyAuthStore>()( //? the 1st () are initilizin
                             }
 
                         } catch (error) {
-                            console.log(error);
                             return {
                                 sucess : false,
-                                error : error instanceof AppwriteException ? error : null
+                                error : error as AppwriteException
                             }
                             
                         }
@@ -120,11 +118,10 @@ export const useAuthStore = create<MyAuthStore>()( //? the 1st () are initilizin
                         try {
                             await account.deleteSessions();
                             set({session:null,user:null,jwt:null});
-                        } catch (error) {
-                            console.log(error);
-                            
+                        } catch {
+                            // Silent fail
                         }
-                    }
+                    },
 
                 }
             )

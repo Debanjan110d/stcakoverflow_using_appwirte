@@ -76,14 +76,17 @@ export async function POST(request: NextRequest){
 
             const author_preferences = await users.getPrefs<UserPrefs>(QuestionOrAnswer.data.authorId)
 
-            await users.updatePrefs<UserPrefs>(
-                {
-                    userId: QuestionOrAnswer.data.authorId,
-                    prefs: {
-                        reputation: voteStatus === 'upvoted' ? Number(author_preferences?.reputation) + 1 : Number(author_preferences?.reputation) - 1
+            //if the vote was present
+            if (response.rows[0]) {
+                await users.updatePrefs<UserPrefs>(//Why do we have to destructure it even when the docs does ont say anythinhg about it 
+                    {
+                        userId: QuestionOrAnswer.data.authorId,
+                        prefs: {
+                            reputation: response.rows[0]?.voteStatus === 'upvoted' ? Number(author_preferences?.reputation) - 1 : Number(author_preferences?.reputation) + 1
+                        }
                     }
-                }
-            )
+                )
+            }
         }
 
 

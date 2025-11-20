@@ -34,9 +34,9 @@ async function safeCall(fn: () => Promise<unknown>, description = ""): Promise<u
 }
 
 export async function createVotesTable() {
-    console.log("Starting creation of table:", votesCollection);
+  // Starting creation of table: votesCollection
 
-    await safeCall(
+  await safeCall(
         () =>
             tables.createTable({
                 databaseId: DATABASE_ID,
@@ -139,5 +139,5 @@ export async function createVotesTable() {
         ),
     ]);
 
-    console.log("✅ Votes table setup complete.");
+    // Votes table setup complete
 }
